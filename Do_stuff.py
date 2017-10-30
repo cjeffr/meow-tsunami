@@ -57,7 +57,7 @@ while (True):
     print(output)
 
     #send everything on to the MOngoDB for display in the cockpit
-    send_to_mongo.connect_to_db(output)
+    send_to_mongo.store(output)
 
 
 

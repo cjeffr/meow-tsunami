@@ -11,15 +11,20 @@ class Send_to_MongoDB(Thread):
     def __init__(self):
         super(Send_to_MongoDB, self).__init__()
 
-
-
-    def connect_to_db(self, output):
-        """Function that connects to the DB and passes the tsunami dictionary"""
+        # connect to the DB and hold onto connection
         mongodb_uri = 'mongodb://%s:%s@%s:%s/%s' % (goat.mUser, goat.mpw, goat.mhost, goat.mport, goat.mdb)
         client = MongoClient(mongodb_uri)
         db = client[goat.mdb]
         coll = db[goat.mcoll]
-        result = coll.insert_one(output)
+
+        self.client = client
+        self.coll = coll
+
+
+
+    def store(self, output):
+        """Function that passes the tsunami dictionary"""
+        result = self.coll.insert_one(output)
         res = result.inserted_id
         print(res)
 
@@ -28,7 +33,4 @@ class Send_to_MongoDB(Thread):
         for document in cursor:
             print(document)
             """
-
-
-
 
