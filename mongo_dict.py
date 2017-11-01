@@ -2,7 +2,7 @@ from threading import Thread
 
 from pymongo import MongoClient
 
-from RunCascadia import goat
+import goat
 
 
 class Send_to_MongoDB(Thread):
@@ -33,4 +33,3 @@ class Send_to_MongoDB(Thread):
         for document in cursor:
             print(document)
             """
-
