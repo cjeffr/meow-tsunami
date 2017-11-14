@@ -26,11 +26,11 @@ def calc_tsunami(slip_result):
     new_sf = []
 
     # declare empty array with max size
-    slip_at_site = np.zeros(shape=(len(time_array), 145))
+    waveheight_per_site = np.zeros(shape=(len(time_array), 145))
 
     #loop over index adn slip value from slip array
     for i, slip in enumerate(slip_result):
-
+        #print(i)
         #make sure slip is a float not string
         s = float(slip)
 
@@ -40,9 +40,9 @@ def calc_tsunami(slip_result):
     # iterate over all the subfaults and add all subfaults together per site
     for sf in new_sf:
 
-        slip_at_site += sf
+        waveheight_per_site += sf
 
     # return the slip_at_site array and the time array
-    return((slip_at_site, time_array))
+    return((waveheight_per_site, time_array))
 
 

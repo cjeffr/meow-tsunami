@@ -39,15 +39,15 @@ send_to_mongo = Send_to_MongoDB()
 while (True):
     # get the earthquake origin time, slip, and  model name from RabbitMQ
     time, slip, model = q.get()
-    print(time, model)
+    print(time, model, slip)
 
     # get my 1 tsunami array by passing slip and the green's functions
     waves, t = calc_tsunami(slip)
     #print(waves, t)
 
     # get the maxes
-    max_t, max_a = maxes.get_max_waveheight(waves, t)
-   # print(max_t, max_a)
+    max_a, max_t = maxes.get_max_waveheight(waves, t)
+    print( max_a)
 
     #load all the sites into an array
     sites = coastal_points_tracking_array()
@@ -56,7 +56,7 @@ while (True):
     output = create_dictionary(model, time, max_t, max_a, sites)
     print(output)
 
-    #send everything on to the MOngoDB for display in the cockpit
+    #send everything on to the MongoDB for display in the cockpit
     send_to_mongo.store(output)
 
 
