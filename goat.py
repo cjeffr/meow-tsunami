@@ -5,9 +5,9 @@ A file to hold all the variables pertaining to Cascadia
 import pika
 
 
-Ihost = "pc96225.d.cwu.edu"
+Ihost = "pc96220.d.cwu.edu"
 Iexchange = 'slip-inversion2'
-Iuserid = "nif_ro"
+Iuserid = "slip_ro"
 Ipassword = "ro"
 Ivirtual_host = "/rtgps-products"
 Iport = 5672
@@ -24,9 +24,9 @@ Iqueue_name = Iresult.method.queue
 
 
 #MongoDB credentials
-mhost = 'pc96225'
+mhost = 'pc96220' #pc96220
 mport = 27018
-mUser = 'producer'
-mpw = 'Miomyax3'
+mUser = 'tsunami' #tsunami
+mpw = 'dotghewb'
 mdb = 'products'
 mcoll = 'tsunami_estimates'
