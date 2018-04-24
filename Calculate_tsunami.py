@@ -5,44 +5,52 @@ waveform for each site (gauge location) and passes one array rather than 200 bac
 rest of the program.
 """
 
-
 import numpy as np
 import h5py
 
-
-#create a dictionary to store the completed array
+# create a dictionary to store the completed array
 mongo_dict = {}
 
-#initialize the array
-max_array = np.zeros(shape=(145,2))
+# initialize the array
+max_array = np.zeros(shape=(145, 2))
 
 
 def calc_tsunami(slip_result):
-    """This function calculates the tsunami sized from slip"""
+    """
+    This function calculates the tsunami sized from slip
+
+    Parameters
+    ----------
+    slip_result: The slip array obtained from RabbitMQ for each model
+
+    Returns:
+    -------
+    waveheight_per_site: the new tGF array for each location
+    time array:  time array
+
+   """
     gf = h5py.File('tsunamis.hdf5', 'r')
     time_array = np.array(gf['time/timedata'])
 
-    #dictionary for holding slip calculations
+    # dictionary for holding slip calculations
     new_sf = []
 
     # declare empty array with max size
     waveheight_per_site = np.zeros(shape=(len(time_array), 145))
 
-    #loop over index adn slip value from slip array
+    # loop over index adn slip value from slip array
     for i, slip in enumerate(slip_result):
-        #print(i)
-        #make sure slip is a float not string
+        # print(i)
+        # make sure slip is a float not string
         s = float(slip)
 
-        #multiply slip by each subfault
-        new_sf.append(s*gf['GF/{:03}'.format(i)][:])
+        # multiply slip by each subfault
+        new_sf.append(s * gf['GF/{:03}'.format(i)][:])
 
     # iterate over all the subfaults and add all subfaults together per site
     for sf in new_sf:
-
         waveheight_per_site += sf
 
     # return the slip_at_site array and the time array
-    return((waveheight_per_site, time_array))
-
+    return (waveheight_per_site, time_array)
 

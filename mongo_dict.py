@@ -1,15 +1,14 @@
 from threading import Thread
-
 from pymongo import MongoClient
-
 import goat
 
 
-class Send_to_MongoDB(Thread):
+class SendToMongoDB(Thread):
     """This class is to connect to the MongoDB and pass my tsunami outputs to the database.
        It is a super class to inherit threading"""
     def __init__(self):
-        super(Send_to_MongoDB, self).__init__()
+
+        super(SendToMongoDB, self).__init__()
 
         # connect to the DB and hold onto connection
         mongodb_uri = 'mongodb://%s:%s@%s:%s/%s' % (goat.mUser, goat.mpw, goat.mhost, goat.mport, goat.mdb)
@@ -19,8 +18,6 @@ class Send_to_MongoDB(Thread):
 
         self.client = client
         self.coll = coll
-
-
 
     def store(self, output):
         """Function that passes the tsunami dictionary"""

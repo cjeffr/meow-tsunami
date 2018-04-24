@@ -11,17 +11,36 @@ import goat
 slip_dict = {}
 
 
-class RabbitMQ_interface(Thread):
+class RabbitMQInterface(Thread):
     """Super Class to use threading to grab slip in a timely manner (every second)"""
     def __init__(self, queue):
         """Super class definition"""
-        super(RabbitMQ_interface, self).__init__()
+        super(RabbitMQInterface, self).__init__()
         self.queue = queue
 
-
     def run(self):
+        """
+        A function that connects to the RabbitMQ and returns the slip, model and time
+        Returns
+        -------
+
+        """
         """Connect to the RabbitMQ, pull out slip, model, time"""
         def callback(ch, method, properties, body):
+            """
+            Connect to RabbitMQ and extract data needed to run tsunami estimation
+            Parameters
+            ----------
+            ch: channel
+            method: method
+            properties: properties
+            body: json string of slip values
+
+            Returns
+            -------
+            Returns slip, time in seconds, model
+
+            """
             simp = json.loads(body.decode("utf-8"))
             time = simp['t']
             simp2 = json.loads(simp['result'])
@@ -38,7 +57,6 @@ class RabbitMQ_interface(Thread):
         channel.basicCancel(goat.Iqueue_name)
 
 
-
 """Commented out because I'm using it elsewhere, leaving it in for random testing without having to re-write
     the code: 6/28/17
     """
@@ -51,7 +69,3 @@ class RabbitMQ_interface(Thread):
 #
 #
 #
-
-
-
-

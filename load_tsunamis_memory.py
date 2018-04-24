@@ -1,9 +1,9 @@
 import os
 import numpy as np
 
+
 # Path of the tide gauge files
 path = "/Users/jeffriesc/Desktop/GF"
-
 
 
 def load_tsunamis():
@@ -29,8 +29,7 @@ def load_tsunamis():
     # create a new dictionary key for each fault and assign the time column to its own key called 'epoch'
     for fault in range(0, len(fault_numbers)):
         tsunami_dict[fault] = np.zeros(shape=(len(data), sitecount))
-        tsunami_dict['epoch']= data[:,0]
-
+        tsunami_dict['epoch'] = data[:, 0]
 
     # Iterate over all files in the directory
     for (root, dirs, filenames) in os.walk(path):
@@ -65,11 +64,10 @@ def load_tsunamis():
 
                 # open the current file, load it into a numpy array, paste the waveheight into
                 # the appropriate column of the subfault array.
-                with open (os.path.join(root, fname)) as f:
+                with open(os.path.join(root, fname)) as f:
 
                     data_from_file = np.loadtxt(f)
                     tsunami_dict[subfault][:, array_index] = data_from_file[:, 1]
 
     # return the entire dictionary
-    return(tsunami_dict)
-
+    return tsunami_dict
