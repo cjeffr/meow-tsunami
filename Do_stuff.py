@@ -19,42 +19,44 @@ from mongo_dict import SendToMongoDB
 # get the green's functions loaded from memory
 gf = load_tsunamis()
 """
-# initialize queue for holding slip values
-q = Queue(maxsize=1)
 
-# pull slip from the RabbitMQ
-get_slip = Slip_Queue.RabbitMQInterface(q)
-get_slip.start()
+if __name__ == "__main__":
+    # initialize queue for holding slip values
+    q = Queue(maxsize=1)
 
-# get maximum waveheight
-maxes = MaxHeight()
+    # pull slip from the RabbitMQ
+    get_slip = Slip_Queue.RabbitMQInterface(q)
+    get_slip.start()
 
-# initialize the output dictionary
-output_dict = {}
+    # get maximum waveheight
+    maxes = MaxHeight()
 
-# variable set to module for sending to the MongoDB
-send_to_mongo = SendToMongoDB()
+    # initialize the output dictionary
+    output_dict = {}
 
-# always run
-while True:
-    # get the earthquake origin time, slip, and  model name from RabbitMQ
-    time, slip, model = q.get()
-    print(time, model, slip)
+    # variable set to module for sending to the MongoDB
+    send_to_mongo = SendToMongoDB()
 
-    # get my 1 tsunami array by passing slip and the green's functions
-    waves, t = calc_tsunami(slip)
-    # print(waves, t)
+    # always run
+    while True:
+        # get the earthquake origin time, slip, and  model name from RabbitMQ
+        time, slip, model = q.get()
+        print(time, model, slip)
 
-    # get the maxes
-    max_a, max_t = maxes.get_max_waveheight(waves, t)
-    print(max_a)
+        # get my 1 tsunami array by passing slip and the green's functions
+        waves, t = calc_tsunami(slip)
+        # print(waves, t)
 
-    # load all the sites into an array
-    sites = coastal_points_tracking_array()
+        # get the maxes
+        max_a, max_t = maxes.get_max_waveheight(waves, t)
+        print(max_a)
 
-    # bind up all output variables into a dictionary
-    output = create_dictionary(model, time, max_t, max_a, sites)
-    print(output)
+        # load all the sites into an array
+        sites = coastal_points_tracking_array()
 
-    # send everything on to the MongoDB for display in the cockpit
-    send_to_mongo.store(output)
+        # bind up all output variables into a dictionary
+        output = create_dictionary(model, time, max_t, max_a, sites)
+        print(output)
+
+        # send everything on to the MongoDB for display in the cockpit
+        send_to_mongo.store(output)
