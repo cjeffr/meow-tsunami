@@ -19,8 +19,8 @@ from mongo_dict import SendToMongoDB
 # get the green's functions loaded from memory
 gf = load_tsunamis()
 """
+def main():
 
-if __name__ == "__main__":
     # initialize queue for holding slip values
     q = Queue(maxsize=1)
 
@@ -60,3 +60,7 @@ if __name__ == "__main__":
 
         # send everything on to the MongoDB for display in the cockpit
         send_to_mongo.store(output)
+
+
+if __name__ == "__main__":
+    main()
