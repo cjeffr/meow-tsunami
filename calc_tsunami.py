@@ -25,7 +25,7 @@ def get_array_size():
 
     """
 
-    tg_file = 'Coast_points.txt'
+    tg_file = 'NA_CAS_gauges.txt'
     lines = open(tg_file).readlines()
     tg_nbr = len(lines)
     return tg_nbr

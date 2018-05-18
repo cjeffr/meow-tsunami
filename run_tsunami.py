@@ -25,7 +25,7 @@ def main():
     q = Queue(maxsize=1)
 
     # pull slip from the RabbitMQ
-    get_slip = Slip_Queue.RabbitMQInterface(q)
+    get_slip = slip_queue.RabbitMQInterface(q)
     get_slip.start()
 
     # get maximum waveheight
