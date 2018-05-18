@@ -20,6 +20,6 @@ def coastal_points_tracking_array():
     """
 
     # declare the original file path and open the file as an array
-    coastal_points_file = 'Coast_points.txt'
+    coastal_points_file = 'NA_CAS_gauges.txt'
     coastal_points_array = np.loadtxt(coastal_points_file)
     return coastal_points_array

@@ -8,9 +8,9 @@ database for display in GPSCockpit
 
 from queue import Queue
 
-import Slip_Queue
-from Calculate_tsunami import calc_tsunami
-from Coastal_points_import_array import coastal_points_tracking_array
+import slip_queue
+from calc_tsunami import calc_tsunami
+from import_gauge_array import coastal_points_tracking_array
 from create_dict import create_dictionary
 from find_max import MaxHeight
 # from RunCascadia.load_tsunamis_memory import load_tsunamis

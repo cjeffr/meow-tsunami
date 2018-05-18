@@ -45,17 +45,17 @@ def calc_tsunami(slip_result):
     time array:  time array
 
    """
-    gf = h5py.File('tsunamis.hdf5', 'r')
+    gf = h5py.File('NA_CAS.hdf5', 'r')
     time_array = np.array(gf['time/timedata'])
 
     # dictionary for holding slip calculations
-    new_sf = []
+    scale_gf = []
 
     # declare empty array with max size
     ar_len = len(time_array)
     ar_width = get_array_size()
 
-    waveheight_per_site = np.zeros(shape=(ar_len, ar_width))
+    tgf = np.zeros(shape=(ar_len, ar_width)) # tgf = tsunami green's function
 
     # loop over index adn slip value from slip array
     for i, slip in enumerate(slip_result):
@@ -64,12 +64,12 @@ def calc_tsunami(slip_result):
         s = float(slip)
 
         # multiply slip by each subfault
-        new_sf.append(s * gf['GF/{:03}'.format(i)][:])
+        scale_gf.append(s * gf['GF/{:03}'.format(i)][:])
 
     # iterate over all the subfaults and add all subfaults together per site
-    for sf in new_sf:
-        waveheight_per_site += sf
+    for sf in scale_gf:
+        tgf += sf
 
     # return the slip_at_site array and the time array
-    return (waveheight_per_site, time_array)
+    return (tgf, time_array)
 

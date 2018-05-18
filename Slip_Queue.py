@@ -41,10 +41,10 @@ class RabbitMQInterface(Thread):
             Returns slip, time in seconds, model
 
             """
-            simp = json.loads(body.decode("utf-8"))
-            time = simp['t']
-            simp2 = json.loads(simp['result'])
-            slip = simp2['slip']
+            m_outer = json.loads(body.decode("utf-8")) # outer message
+            time = m_outer['t']
+            m_inner = json.loads(m_outer['result']) # inner message
+            slip = m_inner['slip']
             slip_dict[time] = slip
             # print(slip_dict)
             self.queue.put((time, slip, method.routing_key))
