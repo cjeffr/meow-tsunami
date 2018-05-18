@@ -1,6 +1,8 @@
 import numpy as np
 
+
 class MaxHeight(object):
+
     """
     Find the maximum value in an array and its associated time and return it to another program.
     This will take the maximum waveheight per site location and return that value and its time
@@ -11,6 +13,19 @@ class MaxHeight(object):
         self.name = None
 
     def get_max_waveheight(self, tsunami_array, time_array):
+        """
+        Extract the maximum waveheight from the tGF and time arrays
+        Parameters
+        ----------
+        tsunami_array: the array of tGFs for each location
+        time_array: the time steps array
+
+        Returns
+        -------
+        max_amp: the maximum height of each tGF
+        max_time: the arrival time of max_amp
+
+        """
 
         # grab the index of the hightest value for that array
         max_index = np.argmax(tsunami_array, axis=0)
@@ -21,7 +36,5 @@ class MaxHeight(object):
         # use the index from the maximum waveheight to get the time
         max_time = time_array[max_index]
 
-        #return max time and max waveheight to be sent to the MongoDB
+        # return max time and max waveheight to be sent to the MongoDB
         return(max_amp, max_time)
-
-
