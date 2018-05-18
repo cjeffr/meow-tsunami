@@ -7,7 +7,7 @@ database for display in GPSCockpit
 
 
 from queue import Queue
-
+import configparser
 import slip_queue
 from calc_tsunami import calc_tsunami
 from import_gauge_array import coastal_points_tracking_array
@@ -19,6 +19,10 @@ from mongo_dict import SendToMongoDB
 # get the green's functions loaded from memory
 gf = load_tsunamis()
 """
+
+cfg = configparser.ConfigParser
+rmq = cfg['rmq']
+
 def main():
 
     # initialize queue for holding slip values
