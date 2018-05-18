@@ -12,8 +12,6 @@ import h5py
 # create a dictionary to store the completed array
 mongo_dict = {}
 
-# initialize the array
-max_array = np.zeros(shape=(145, 2))
 
 def get_array_size():
     """
@@ -24,7 +22,6 @@ def get_array_size():
     tg_nbr = the number of tide gauges tracked
 
     """
-
     tg_file = 'NA_CAS_gauges.txt'
     lines = open(tg_file).readlines()
     tg_nbr = len(lines)
