@@ -22,14 +22,15 @@ gf = load_tsunamis()
 
 cfg = configparser.ConfigParser
 rmq = cfg['rmq']
-
+mdb = cfg['mdb']
+model = cfg['model']
 def main():
 
     # initialize queue for holding slip values
     q = Queue(maxsize=1)
 
     # pull slip from the RabbitMQ
-    get_slip = slip_queue.RabbitMQInterface(q)
+    get_slip = slip_queue.RabbitMQInterface(q, rmq)
     get_slip.start()
 
     # get maximum waveheight
@@ -39,7 +40,7 @@ def main():
     output_dict = {}
 
     # variable set to module for sending to the MongoDB
-    send_to_mongo = SendToMongoDB()
+    send_to_mongo = SendToMongoDB(mdb)
 
     # always run
     while True:

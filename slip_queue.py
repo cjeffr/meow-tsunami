@@ -13,17 +13,17 @@ slip_dict = {}
 
 class RabbitMQInterface(Thread):
     """Super Class to use threading to grab slip in a timely manner (every second)"""
-    def __init__(self, queue):
+    def __init__(self, queue, rmq):
         """Super class definition"""
         super(RabbitMQInterface, self).__init__()
         self.queue = queue
-        self.host = goat.host
-        self.exchange = goat.exchange
-        self.uid = goat.uid
-        self.pw = goat.pw
-        self.vhost = goat.vhost
-        self.port = goat.port
-        self.key = goat.key
+        self.host = rmq['host'] # goat.host
+        self.exchange = rmq['exchange'] # goat.exchange
+        self.uid = rmq['uid'] # goat.uid
+        self.pw = rmq['pw'] # goat.pw
+        self.vhost = rmq['vhost'] # goat.vhost
+        self.port = rmq['port'] # goat.port
+        self.key = rmq['key'] # goat.key
 
         self.credentials = pika.PlainCredentials(self.uid, self.pw)
         self.params = pika.ConnectionParameters(self.host, self.port, self.vhost, self.credentials)
