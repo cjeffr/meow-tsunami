@@ -23,7 +23,7 @@ gf = load_tsunamis()
 cfg = configparser.ConfigParser
 rmq = cfg['rmq']
 mdb = cfg['mdb']
-model = cfg['model']
+model = cfg['NA_CAS'] ####CHECK HERE!!!!!!
 def main():
 
     # initialize queue for holding slip values
@@ -40,7 +40,7 @@ def main():
     output_dict = {}
 
     # variable set to module for sending to the MongoDB
-    send_to_mongo = SendToMongoDB(mdb)
+    send_to_mongo = SendToMongoDB()
 
     # always run
     while True:
@@ -64,7 +64,7 @@ def main():
         print(output)
 
         # send everything on to the MongoDB for display in the cockpit
-        send_to_mongo.store(output)
+        send_to_mongo.store(output, mdb)
 
 
 if __name__ == "__main__":

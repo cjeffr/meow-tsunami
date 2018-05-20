@@ -12,7 +12,12 @@ import h5py
 # create a dictionary to store the completed array
 mongo_dict = {}
 
-
+class SlipCalc():
+    def __init__(self, model):
+        self.name = model['name']
+        self.gauge_file = model['gauges']
+        self.catalog = model['catalog']
+        
 def get_array_size():
     """
     Defines the size of the array based on the number of tide gauges tracked and the number of subfaults
