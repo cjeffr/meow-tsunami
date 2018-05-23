@@ -7,7 +7,7 @@ database for display in GPSCockpit
 
 
 from queue import Queue
-
+import configparser
 import slip_queue
 from calc_tsunami import calc_tsunami
 from import_gauge_array import coastal_points_tracking_array
@@ -19,13 +19,18 @@ from mongo_dict import SendToMongoDB
 # get the green's functions loaded from memory
 gf = load_tsunamis()
 """
+
+cfg = configparser.ConfigParser
+rmq = cfg['rmq']
+mdb = cfg['mdb']
+model = cfg['NA_CAS'] ####CHECK HERE!!!!!!
 def main():
 
     # initialize queue for holding slip values
     q = Queue(maxsize=1)
 
     # pull slip from the RabbitMQ
-    get_slip = slip_queue.RabbitMQInterface(q)
+    get_slip = slip_queue.RabbitMQInterface(q, rmq)
     get_slip.start()
 
     # get maximum waveheight
@@ -59,7 +64,7 @@ def main():
         print(output)
 
         # send everything on to the MongoDB for display in the cockpit
-        send_to_mongo.store(output)
+        send_to_mongo.store(output, mdb)
 
 
 if __name__ == "__main__":

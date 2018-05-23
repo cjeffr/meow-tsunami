@@ -5,7 +5,7 @@ Do_Stuff.py for processing.
 
 import json
 from threading import Thread
-
+import pika
 import goat
 
 slip_dict = {}
@@ -13,10 +13,26 @@ slip_dict = {}
 
 class RabbitMQInterface(Thread):
     """Super Class to use threading to grab slip in a timely manner (every second)"""
-    def __init__(self, queue):
+    def __init__(self, queue, rmq):
         """Super class definition"""
         super(RabbitMQInterface, self).__init__()
         self.queue = queue
+        self.host = rmq['host'] # goat.host
+        self.exchange = rmq['exchange'] # goat.exchange
+        self.uid = rmq['uid'] # goat.uid
+        self.pw = rmq['pw'] # goat.pw
+        self.vhost = rmq['vhost'] # goat.vhost
+        self.port = rmq['port'] # goat.port
+        self.key = rmq['key'] # goat.key
+
+        self.credentials = pika.PlainCredentials(self.uid, self.pw)
+        self.params = pika.ConnectionParameters(self.host, self.port, self.vhost, self.credentials)
+        self.conn = pika.BlockingConnection(self.params)
+        self.ch = self.conn.channel()
+        self.ch.exchange_declare(exchange=self.exchange, type='topic', passive=True)
+        self.result = self.ch.queue_declare()
+        self.queue_name = self.result.method.queue
+
 
     def run(self):
         """
@@ -41,20 +57,20 @@ class RabbitMQInterface(Thread):
             Returns slip, time in seconds, model
 
             """
-            m_outer = json.loads(body.decode("utf-8")) # outer message
+            m_outer = json.loads(body.decode("utf-8"))  # outer message
             time = m_outer['t']
-            m_inner = json.loads(m_outer['result']) # inner message
+            m_inner = json.loads(m_outer['result'])  # inner message
             slip = m_inner['slip']
             slip_dict[time] = slip
             # print(slip_dict)
             self.queue.put((time, slip, method.routing_key))
 
-        channel = goat.Ichannel
-        channel.exchange_declare(exchange=goat.Iexchange, type='topic', passive=True)
-        channel.queue_bind(exchange=goat.Iexchange, queue=goat.Iqueue_name, routing_key=goat.Ikey)
-        channel.basic_consume(callback, queue=goat.Iqueue_name, no_ack=True)
-        channel.start_consuming()
-        channel.basicCancel(goat.Iqueue_name)
+        ch = self.ch
+        ch.exchange_declare(exchange=self.exchange, type='topic', passive=True)
+        ch.queue_bind(exchange=self.exchange, queue=self.queue_name, routing_key=self.key)
+        ch.basic_consume(callback, queue=self.queue_name, no_ack=True)
+        ch.start_consuming()
+        ch.basicCancel(self.queue_name)
 
 
 """Commented out because I'm using it elsewhere, leaving it in for random testing without having to re-write
