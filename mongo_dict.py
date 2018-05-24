@@ -12,10 +12,11 @@ class SendToMongoDB(Thread):
         self.mhost = mdb['mhost']
         self.mdb = mdb['mdb']
         self.mcoll = mdb['mcoll']
+        self.mport = int(mdb['mport'])
         super(SendToMongoDB, self).__init__()
 
         # connect to the DB and hold onto connection
-        mongodb_uri = 'mongodb://%s:%s@%s:%s/%s' % (self.user, self.mpw, self.mhost, self.mdb)
+        mongodb_uri = 'mongodb://%s:%s@%s:%s/%s' % (self.user, self.mpw, self.mhost, self.mport, self.mdb)
                       #(goat.mUser, goat.mpw, goat.mhost, goat.mport, goat.mdb)
         client = MongoClient(mongodb_uri)
         db = client[self.mdb]

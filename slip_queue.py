@@ -22,7 +22,7 @@ class RabbitMQInterface(Thread):
         self.uid = rmq['uid'] # goat.uid
         self.pw = rmq['pw'] # goat.pw
         self.vhost = rmq['vhost'] # goat.vhost
-        self.port = rmq['port'] # goat.port
+        self.port = int(rmq['port']) # goat.port
         self.key = rmq['key'] # goat.key
 
         self.credentials = pika.PlainCredentials(self.uid, self.pw)
