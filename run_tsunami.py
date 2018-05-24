@@ -16,6 +16,7 @@ from find_max import MaxHeight
 # from RunCascadia.load_tsunamis_memory import load_tsunamis
 from mongo_dict import SendToMongoDB
 import time
+import pika
 """comment out load_tsunamis 9/21/17 to test loading on demand from binary file
 # get the green's functions loaded from memory
 gf = load_tsunamis()
@@ -27,6 +28,7 @@ rmq = cfg['rmq']
 mdb = cfg['mdb']
 model = cfg['NA_CAS'] ####CHECK HERE!!!!!!
 epoch = time
+import sys
 def main():
 
     # initialize queue for holding slip values
@@ -44,32 +46,37 @@ def main():
 
     # variable set to module for sending to the MongoDB
     send_to_mongo = SendToMongoDB(mdb)
+    try:
 
-    # always run
-    while True:
-        # get the earthquake origin time, slip, and  model name from RabbitMQ
-        time, slip, model = q.get()
-        print(time) #, model, slip)
-        current = epoch.time()
-        diff = current - time
-        print(diff)
-        # get my 1 tsunami array by passing slip and the green's functions
-        waves, t = calc_tsunami(slip)
-        # print(waves, t)
+        # always run
+        while True:
+            # get the earthquake origin time, slip, and  model name from RabbitMQ
+            time, slip, model = q.get()
+            print(time) #, model, slip)
+            current = epoch.time()
+            diff = current - time
+            print(diff)
+            # get my 1 tsunami array by passing slip and the green's functions
+            waves, t = calc_tsunami(slip)
+            # print(waves, t)
 
-        # get the maxes
-        max_a, max_t = maxes.get_max_waveheight(waves, t)
-        #print(max_a)
+            # get the maxes
+            max_a, max_t = maxes.get_max_waveheight(waves, t)
+            #print(max_a)
 
-        # load all the sites into an array
-        sites = coastal_points_tracking_array()
+            # load all the sites into an array
+            sites = coastal_points_tracking_array()
 
-        # bind up all output variables into a dictionary
-        output = create_dictionary(model, time, max_t, max_a, sites)
-        #print(output)
+            # bind up all output variables into a dictionary
+            output = create_dictionary(model, time, max_t, max_a, sites)
+            #print(output)
 
-        # send everything on to the MongoDB for display in the cockpit
-        send_to_mongo.store(output)
+            # send everything on to the MongoDB for display in the cockpit
+            send_to_mongo.store(output)
+    except pika.exceptions.ConnectionClosed as CC:
+        print('Pika connection closed {}'.format(CC))
+        sys.exit(1)
+
 
 
 if __name__ == "__main__":
