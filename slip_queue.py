@@ -6,7 +6,7 @@ Do_Stuff.py for processing.
 import json
 from threading import Thread
 import pika
-import goat
+import sys
 
 slip_dict = {}
 
@@ -33,6 +33,9 @@ class RabbitMQInterface(Thread):
         self.result = self.ch.queue_declare()
         self.queue_name = self.result.method.queue
 
+    def stop(self):
+        self.ch.stop_consuming()
+
 
     def run(self):
         """
@@ -41,37 +44,43 @@ class RabbitMQInterface(Thread):
         -------
 
         """
-        """Connect to the RabbitMQ, pull out slip, model, time"""
-        def callback(ch, method, properties, body):
-            """
-            Connect to RabbitMQ and extract data needed to run tsunami estimation
-            Parameters
-            ----------
-            ch: channel
-            method: method
-            properties: properties
-            body: json string of slip values
+        try:
 
-            Returns
-            -------
-            Returns slip, time in seconds, model
 
-            """
-            m_outer = json.loads(body.decode("utf-8"))  # outer message
-            time = m_outer['t']
-            m_inner = json.loads(m_outer['result'])  # inner message
-            slip = m_inner['slip']
-            slip_dict[time] = slip
-            # print(slip_dict)
-            self.queue.put((time, slip, method.routing_key))
+            """Connect to the RabbitMQ, pull out slip, model, time"""
+            def callback(ch, method, properties, body):
+                """
+                Connect to RabbitMQ and extract data needed to run tsunami estimation
+                Parameters
+                ----------
+                ch: channel
+                method: method
+                properties: properties
+                body: json string of slip values
 
-        ch = self.ch
-        ch.exchange_declare(exchange=self.exchange, type='topic', passive=True)
-        ch.queue_bind(exchange=self.exchange, queue=self.queue_name, routing_key=self.key)
-        ch.basic_consume(callback, queue=self.queue_name, no_ack=True)
-        ch.start_consuming()
-        ch.basicCancel(self.queue_name)
+                Returns
+                -------
+                Returns slip, time in seconds, model
 
+                """
+                m_outer = json.loads(body.decode("utf-8"))  # outer message
+                time = m_outer['t']
+                m_inner = json.loads(m_outer['result'])  # inner message
+                slip = m_inner['slip']
+                slip_dict[time] = slip
+                # print(slip_dict)
+                self.queue.put((time, slip, method.routing_key))
+
+            ch = self.ch
+            ch.exchange_declare(exchange=self.exchange, type='topic', passive=True)
+            ch.queue_bind(exchange=self.exchange, queue=self.queue_name, routing_key=self.key)
+            ch.basic_consume(callback, queue=self.queue_name, no_ack=True)
+            ch.start_consuming()
+           # ch.basicCancel(self.queue_name)
+        except Exception as CC: #pika.exceptions.ConnectionClosed as CC:
+            print('Pika connection closed {}: {}'.format(type(CC), str(CC)))
+            self.stop()
+            sys.exit(1)
 
 """Commented out because I'm using it elsewhere, leaving it in for random testing without having to re-write
     the code: 6/28/17

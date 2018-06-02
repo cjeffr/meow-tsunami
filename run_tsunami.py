@@ -46,36 +46,39 @@ def main():
 
     # variable set to module for sending to the MongoDB
     send_to_mongo = SendToMongoDB(mdb)
-    try:
 
-        # always run
-        while True:
-            # get the earthquake origin time, slip, and  model name from RabbitMQ
+
+    # always run
+    while True:
+        # get the earthquake origin time, slip, and  model name from RabbitMQ
+        try:
             time, slip, model = q.get()
-            print(time) #, model, slip)
-            current = epoch.time()
-            diff = current - time
-            print(diff)
-            # get my 1 tsunami array by passing slip and the green's functions
-            waves, t = calc_tsunami(slip)
-            # print(waves, t)
+        except Exception as CC: #pika.exceptions.ConnectionClosed as CC:
+            print('Pika connection closed {}: {}'.format(type(CC), str(CC)))
+            sys.exit(1)
 
-            # get the maxes
-            max_a, max_t = maxes.get_max_waveheight(waves, t)
-            #print(max_a)
+        print(time) #, model, slip)
+        current = epoch.time()
+        diff = current - time
+        print(diff)
+        # get my 1 tsunami array by passing slip and the green's functions
+        waves, t = calc_tsunami(slip)
+        # print(waves, t)
 
-            # load all the sites into an array
-            sites = coastal_points_tracking_array()
+        # get the maxes
+        max_a, max_t = maxes.get_max_waveheight(waves, t)
+        #print(max_a)
 
-            # bind up all output variables into a dictionary
-            output = create_dictionary(model, time, max_t, max_a, sites)
-            #print(output)
+        # load all the sites into an array
+        sites = coastal_points_tracking_array()
 
-            # send everything on to the MongoDB for display in the cockpit
-            send_to_mongo.store(output)
-    except pika.exceptions.ConnectionClosed as CC:
-        print('Pika connection closed {}'.format(CC))
-        sys.exit(1)
+        # bind up all output variables into a dictionary
+        output = create_dictionary(model, time, max_t, max_a, sites)
+        #print(output)
+
+        # send everything on to the MongoDB for display in the cockpit
+        send_to_mongo.store(output)
+
 
 
 
