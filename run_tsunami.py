@@ -32,12 +32,11 @@ mdb = cfg['mdb']
 def main(name):
     model = cfg[name]
     # initialize queue for holding slip values
-    q = Queue(maxsize=1)
+    q = Queue(maxsize=10)
 
+    # load all the sites into an array
+    sites = coastal_points_tracking_array()
 
-    # pull slip from the RabbitMQ
-    get_slip = slip_queue.RabbitMQInterface(q, rmq)
-    get_slip.start()
 
     # get maximum waveheight
     maxes = MaxHeight()
@@ -48,6 +47,10 @@ def main(name):
 
     # variable set to module for sending to the MongoDB
     send_to_mongo = SendToMongoDB(mdb)
+
+    # pull slip from the RabbitMQ
+    get_slip = slip_queue.RabbitMQInterface(q, rmq)
+    get_slip.start()
 
     # always run
     while True:
@@ -65,8 +68,6 @@ def main(name):
         max_a, max_t = maxes.get_max_waveheight(waves, t)
         # print(max_a)
 
-        # load all the sites into an array
-        sites = coastal_points_tracking_array()
 
         # bind up all output variables into a dictionary
         output = create_dictionary(name, time, max_t, max_a, sites)
