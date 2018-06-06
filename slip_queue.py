@@ -67,7 +67,7 @@ class RabbitMQInterface(Thread):
                 time = m_outer['t']
                 m_inner = json.loads(m_outer['result'])  # inner message
                 slip = m_inner['slip']
-                slip_dict[time] = slip
+                # slip_dict[time] = slip commented out 6/5/18 to see if it was used
                 # print(slip_dict)
                 self.queue.put((time, slip, method.routing_key))
 

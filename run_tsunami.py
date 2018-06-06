@@ -17,6 +17,7 @@ from find_max import MaxHeight
 from mongo_dict import SendToMongoDB
 import argparse
 import time
+import h5py
 
 """comment out load_tsunamis 9/21/17 to test loading on demand from binary file
 # get the green's functions loaded from memory
@@ -32,7 +33,12 @@ mdb = cfg['mdb']
 def main(name):
     model = cfg[name]
     # initialize queue for holding slip values
-    q = Queue(maxsize=10)
+    try:
+        in_q = Queue(maxsize=10)
+        out_q = Queue(maxsize=10)
+    except Exception as EE:
+        print('Exception! {}: {}',format(type(EE), str(EE)))
+
 
     # load all the sites into an array
     sites = coastal_points_tracking_array()
@@ -45,17 +51,20 @@ def main(name):
     output_dict = {}
     calc = SlipCalc(model)
 
+
     # variable set to module for sending to the MongoDB
-    send_to_mongo = SendToMongoDB(mdb)
+
+    send_to_mongo = SendToMongoDB(mdb, out_q)
+    send_to_mongo.start()
 
     # pull slip from the RabbitMQ
-    get_slip = slip_queue.RabbitMQInterface(q, rmq)
+    get_slip = slip_queue.RabbitMQInterface(in_q, rmq)
     get_slip.start()
 
     # always run
     while True:
         # get the earthquake origin time, slip, and  model name from RabbitMQ
-        time, slip, model = q.get()
+        time, slip, model = in_q.get()
         print(time)  # , model, slip)
         current = epoch.time()
         diff = current - time
@@ -71,10 +80,11 @@ def main(name):
 
         # bind up all output variables into a dictionary
         output = create_dictionary(name, time, max_t, max_a, sites)
+        out_q.put(output)
         # print(output)
 
         # send everything on to the MongoDB for display in the cockpit
-        send_to_mongo.store(output)
+        #send_to_mongo(out_q)
 
 
 if __name__ == "__main__":

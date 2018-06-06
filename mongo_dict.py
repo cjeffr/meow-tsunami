@@ -6,13 +6,15 @@ import goat
 class SendToMongoDB(Thread):
     """This class is to connect to the MongoDB and pass my tsunami outputs to the database.
        It is a super class to inherit threading"""
-    def __init__(self, mdb):
+    def __init__(self, mdb, out_q):
+
         self.user = mdb['mUser']
         self.mpw = mdb['mpw']
         self.mhost = mdb['mhost']
         self.mdb = mdb['mdb']
         self.mcoll = mdb['mcoll']
         self.mport = int(mdb['mport'])
+        self.q = out_q
         super(SendToMongoDB, self).__init__()
 
         # connect to the DB and hold onto connection
@@ -25,8 +27,9 @@ class SendToMongoDB(Thread):
         self.client = client
         self.coll = coll
 
-    def store(self, output):
+    def run(self):
         """Function that passes the tsunami dictionary"""
+        output = self.q.get()
         result = self.coll.insert_one(output)
         res = result.inserted_id
         print(res)
