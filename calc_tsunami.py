@@ -33,7 +33,7 @@ class SlipCalc():
         return tg_nbr
 
 
-    def calc_tsunami(self, slip_result):
+    def calc_tsunami(self, slip_result, tgfs):
         """
         This function calculates the tsunami sized from slip
 
@@ -47,8 +47,8 @@ class SlipCalc():
         time array:  time array
 
        """
-        gf = h5py.File(self.catalog, 'r') # h5py.File('NA_CAS.hdf5', 'r')
-        time_array = np.array(gf['time/timedata'])
+       # gf = h5py.File(self.catalog, 'r') # h5py.File('NA_CAS.hdf5', 'r')
+        time_array = np.array(tgfs['time/timedata'])
 
         # dictionary for holding slip calculations
         scale_gf = []
@@ -67,7 +67,7 @@ class SlipCalc():
             s = float(slip)
 
             # multiply slip by each subfault
-            scale_gf.append(s * gf['GF/{:03}'.format(i)][:])
+            scale_gf.append(s * tgfs['GF/{:03}'.format(i)][:])
 
         # iterate over all the subfaults and add all subfaults together per site
         for sf in scale_gf:

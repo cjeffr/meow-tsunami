@@ -35,9 +35,11 @@ def main(name):
     # initialize queue for holding slip values
     try:
         in_q = Queue(maxsize=10)
-        out_q = Queue(maxsize=10)
+        out_q = Queue(maxsize=0)
     except Exception as EE:
         print('Exception! {}: {}',format(type(EE), str(EE)))
+
+    tgfs = h5py.File(model['catalog'])
 
 
     # load all the sites into an array
@@ -70,7 +72,7 @@ def main(name):
         diff = current - time
         print(diff)
         # get my 1 tsunami array by passing slip and the green's functions
-        waves, t = calc.calc_tsunami(slip)
+        waves, t = calc.calc_tsunami(slip, tgfs)
         # print(waves, t)
 
         # get the maxes
@@ -80,7 +82,7 @@ def main(name):
 
         # bind up all output variables into a dictionary
         output = create_dictionary(name, time, max_t, max_a, sites)
-        out_q.put(output)
+        out_q.put_nowait(output)
         # print(output)
 
         # send everything on to the MongoDB for display in the cockpit
