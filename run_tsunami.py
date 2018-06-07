@@ -24,13 +24,13 @@ import h5py
 gf = load_tsunamis()
 """
 epoch = time
-cfg = configparser.ConfigParser()
-cfg.read('tsunami_config.ini')
-rmq = cfg['rmq']
-mdb = cfg['mdb']
+
+
 #model = cfg['NA_CAS'] ####CHECK HERE!!!!!!
 
-def main(name):
+def main(name, cfg):
+    rmq = cfg['rmq']
+    mdb = cfg['mdb']
     model = cfg[name]
     # initialize queue for holding slip values
     try:
@@ -39,7 +39,7 @@ def main(name):
     except Exception as EE:
         print('Exception! {}: {}',format(type(EE), str(EE)))
 
-    tgfs = h5py.File(model['catalog'])
+    tgfs = h5py.File(model['catalog'], 'r')
 
 
     # load all the sites into an array
@@ -52,7 +52,6 @@ def main(name):
     # initialize the output dictionary
     output_dict = {}
     calc = SlipCalc(model)
-
 
     # variable set to module for sending to the MongoDB
 
@@ -93,4 +92,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Model Name')
     parser.add_argument('name', help = 'model name you are using')
     args = parser.parse_args()
-    main(args.name)
+    cfg = configparser.ConfigParser()
+    cfg.read('tsunami_config.ini')
+
+    main(args.name, cfg)
