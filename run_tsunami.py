@@ -51,7 +51,8 @@ def main(name, cfg):
 
     # initialize the output dictionary
     output_dict = {}
-    calc = SlipCalc(model)
+    #calc = SlipCalc(model)
+   # calc.start()
 
     # variable set to module for sending to the MongoDB
 
@@ -62,6 +63,10 @@ def main(name, cfg):
     get_slip = slip_queue.RabbitMQInterface(in_q, rmq)
     get_slip.start()
 
+
+    calc_input_q = Queue()
+    calc_output_q = Queue()
+
     # always run
     while True:
         # get the earthquake origin time, slip, and  model name from RabbitMQ
@@ -71,18 +76,25 @@ def main(name, cfg):
         diff = current - time
         print(diff)
         # get my 1 tsunami array by passing slip and the green's functions
-        waves, t = calc.calc_tsunami(slip, tgfs)
+        calc_input_q.put(slip)
+        slip_calc = SlipCalc(model, calc_input_q, calc_output_q, tgfs)
+        SlipCalc.start() #calc.calc_tsunami(slip, tgfs)
         # print(waves, t)
+        try:
 
-        # get the maxes
-        max_a, max_t = maxes.get_max_waveheight(waves, t)
-        # print(max_a)
+            waves, t = calc_output_q.get(False)
+            # get the maxes
+            max_a, max_t = maxes.get_max_waveheight(waves, t)
+            # print(max_a)
 
 
-        # bind up all output variables into a dictionary
-        output = create_dictionary(name, time, max_t, max_a, sites)
-        out_q.put_nowait(output)
-        # print(output)
+            # bind up all output variables into a dictionary
+            output = create_dictionary(name, time, max_t, max_a, sites)
+            out_q.put_nowait(output)
+            # print(output)
+        except Queue.queue.empty:
+            pass
+
 
         # send everything on to the MongoDB for display in the cockpit
         #send_to_mongo(out_q)

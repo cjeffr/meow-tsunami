@@ -7,17 +7,32 @@ rest of the program.
 
 import numpy as np
 import h5py
+from threading import Thread
 
 
 # create a dictionary to store the completed array
 mongo_dict = {}
 
-class SlipCalc():
-    def __init__(self, model):
+class SlipCalc(Thread):
+
+    def __init__(self, model, calc_input_q, calc_output_q, catalog):
+        super(SlipCalc, self).__init__()
         self.name = model['name']
         self.gauge_file = model['gauges']
         self.catalog = model['catalog']
-        
+        self.in_q = calc_input_q
+        self.out_q = calc_output_q
+        self.time = catalog['time/timedata']
+        self.tgfs = catalog['GF']
+
+
+
+    def run(self):
+        slip = self.in_q.get()
+        self.out_q.put(calc_tsunami(slip))
+
+
+
     def get_array_size(self):
         """
         Defines the size of the array based on the number of tide gauges tracked and the number of subfaults
@@ -33,7 +48,7 @@ class SlipCalc():
         return tg_nbr
 
 
-    def calc_tsunami(self, slip_result, tgfs):
+    def calc_tsunami(self, slip):
         """
         This function calculates the tsunami sized from slip
 

@@ -69,7 +69,7 @@ class RabbitMQInterface(Thread):
                 slip = m_inner['slip']
                 # slip_dict[time] = slip commented out 6/5/18 to see if it was used
                 # print(slip_dict)
-                self.queue.put((time, slip, method.routing_key))
+                self.queue.put_nowait((time, slip, method.routing_key))
 
             ch = self.ch
             ch.exchange_declare(exchange=self.exchange, type='topic', passive=True)
