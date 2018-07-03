@@ -5,8 +5,7 @@ to get a new waveform for all tracked tide gauges, and reports the max height an
 database for display in GPSCockpit
 """
 
-
-from queue import Queue
+import queue
 import configparser
 import slip_queue
 from calc_tsunami import SlipCalc
@@ -32,10 +31,11 @@ def main(name, cfg):
     rmq = cfg['rmq']
     mdb = cfg['mdb']
     model = cfg[name]
+    print(model['gauges'])
     # initialize queue for holding slip values
     try:
-        in_q = Queue(maxsize=10)
-        out_q = Queue(maxsize=0)
+        in_q = queue.Queue()
+        out_q = queue.Queue()
     except Exception as EE:
         print('Exception! {}: {}',format(type(EE), str(EE)))
 
@@ -64,9 +64,11 @@ def main(name, cfg):
     get_slip.start()
 
 
-    calc_input_q = Queue()
-    calc_output_q = Queue()
-
+    calc_input_q = queue.Queue()
+    calc_output_q = queue.Queue()
+    for x in range(4):
+        slip_calc = SlipCalc(model, calc_input_q, calc_output_q, tgfs)
+        slip_calc.start()
     # always run
     while True:
         # get the earthquake origin time, slip, and  model name from RabbitMQ
@@ -77,8 +79,8 @@ def main(name, cfg):
         print(diff)
         # get my 1 tsunami array by passing slip and the green's functions
         calc_input_q.put(slip)
-        slip_calc = SlipCalc(model, calc_input_q, calc_output_q, tgfs)
-        SlipCalc.start() #calc.calc_tsunami(slip, tgfs)
+
+        #calc.calc_tsunami(slip, tgfs)
         # print(waves, t)
         try:
 
@@ -92,7 +94,7 @@ def main(name, cfg):
             output = create_dictionary(name, time, max_t, max_a, sites)
             out_q.put_nowait(output)
             # print(output)
-        except Queue.queue.empty:
+        except queue.Empty:
             pass
 
 

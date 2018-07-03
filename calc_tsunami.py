@@ -17,9 +17,9 @@ class SlipCalc(Thread):
 
     def __init__(self, model, calc_input_q, calc_output_q, catalog):
         super(SlipCalc, self).__init__()
-        self.name = model['name']
-        self.gauge_file = model['gauges']
-        self.catalog = model['catalog']
+        self.name = model
+        # self.gauge_file = model['gauges']
+        # self.catalog = model['catalog']
         self.in_q = calc_input_q
         self.out_q = calc_output_q
         self.time = catalog['time/timedata']
@@ -28,8 +28,10 @@ class SlipCalc(Thread):
 
 
     def run(self):
-        slip = self.in_q.get()
-        self.out_q.put(calc_tsunami(slip))
+        while True:
+            slip = self.in_q.get()
+            self.out_q.put(self.calc_tsunami(slip))
+
 
 
 
@@ -42,13 +44,13 @@ class SlipCalc(Thread):
         tg_nbr = the number of tide gauges tracked
 
         """
-        tg_file = self.gauge_file #'NA_CAS_gauges.txt'
+        tg_file = 'NA_CAS_gauges.txt' #self.name['gauges'] # self.gauge_file #'NA_CAS_gauges.txt'
         lines = open(tg_file).readlines()
         tg_nbr = len(lines)
         return tg_nbr
 
 
-    def calc_tsunami(self, slip):
+    def calc_tsunami(self, slip_result):
         """
         This function calculates the tsunami sized from slip
 
@@ -63,7 +65,7 @@ class SlipCalc(Thread):
 
        """
        # gf = h5py.File(self.catalog, 'r') # h5py.File('NA_CAS.hdf5', 'r')
-        time_array = np.array(tgfs['time/timedata'])
+        time_array = np.array(self.time)
 
         # dictionary for holding slip calculations
         scale_gf = []
@@ -82,7 +84,7 @@ class SlipCalc(Thread):
             s = float(slip)
 
             # multiply slip by each subfault
-            scale_gf.append(s * tgfs['GF/{:03}'.format(i)][:])
+            scale_gf.append(s * self.tgfs['{:03}'.format(i)][:])
 
         # iterate over all the subfaults and add all subfaults together per site
         for sf in scale_gf:
